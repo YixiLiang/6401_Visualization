@@ -10,7 +10,7 @@ df = df.dropna(axis=0, how='any')
 
 col_name = []
 df['China_sum'] = df.iloc[0:, 57:90].astype(float).sum(axis=1)
-df['United Kingdom_sum'] = df.iloc[0:, 246:260].astype(float).sum(axis=1)
+df['United Kingdom_sum'] = df.iloc[0:, 249:260].astype(float).sum(axis=1)
 
 for col in df.columns:
     col_name.append(col)
@@ -45,6 +45,6 @@ def display_country(country):
     return fig
 
 my_app.run_server(
-    port=8036,
+    port=8037,
     debug=True
 )

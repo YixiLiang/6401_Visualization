@@ -1,5 +1,4 @@
 import math
-
 import dash as dash
 import pandas as pd
 import numpy as np
@@ -7,7 +6,15 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import plotly.express as px
-from scipy.fft import fft, fftfreq
+from scipy.fft import fft
+
+
+# website
+# https://dashapp-x5pxteuiza-wn.a.run.app/
+
+#######################################
+# Index page
+#######################################
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 my_app = dash.Dash('HW4', suppress_callback_exceptions=True, external_stylesheets=external_stylesheets)
@@ -18,8 +25,7 @@ my_app.layout = html.Div([
     dcc.Tabs(id='hw-questions', children=[
         dcc.Tab(label='Question1', value='q1'),
         dcc.Tab(label='Question2', value='q2'),
-        dcc.Tab(label='Question3', value='q3')
-    ]),
+        dcc.Tab(label='Question3', value='q3')], value='q1'),
     html.Div(id='layout')
 ])
 
@@ -37,6 +43,9 @@ def update_layout(ques):
         return question3_layout
 
 
+#######################################
+# Q1 displays the entered data
+#######################################
 question1_layout = html.Div([
     html.B('Change the value in the textbox to see callbacks in action'),
     html.Br(),
@@ -54,18 +63,21 @@ def display_input(input):
     return f'The output value is {input}'
 
 
+#######################################
+# Q2 f(x) = sin(x) + noise / Fast Fourier Transform (FFT)
+#######################################
 question2_layout = html.Div([
     html.H6('Please enter the number of sinusoidal cycle', style={'font-weight': 'bold'}),
-    dcc.Input(id='sinCycle', type='number'),
+    dcc.Input(id='sinCycle', type='number', placeholder='The default number is 1', value=1),
     html.Br(),
     html.H6('Please enter the mean of the white noise', style={'font-weight': 'bold'}),
-    dcc.Input(id='noiseMean', type='number'),
+    dcc.Input(id='noiseMean', type='number', placeholder='The default number is 1', value=1),
     html.Br(),
     html.H6('Please enter the standard deviation of white noise', style={'font-weight': 'bold'}),
-    dcc.Input(id='noiseStd', type='number'),
+    dcc.Input(id='noiseStd', type='number', placeholder='The default number is 1', value=1),
     html.Br(),
     html.H6('Please enter the number of sample', style={'font-weight': 'bold'}),
-    dcc.Input(id='sample', type='number'),
+    dcc.Input(id='sample', type='number', placeholder='The default number is 1000', value=1000),
     html.Br(),
     html.Br(),
     dcc.Graph(id='sin-graph'),
@@ -101,13 +113,15 @@ def display_sinGraph(sinCycle, noiseMean, noiseStd, sample):
 
     figSinCycle = px.line(x=x, y=y, range_x=[-math.pi, math.pi])
     N = sample
-    T = 2*math.pi/sample
+    T = 2 * math.pi / sample
     yf = list(fft(y))
     # xf = fftfreq(N, T)[:N // 2]
     figFft = px.line(x=x, y=np.abs(yf), range_x=[-math.pi, math.pi])
-    return figSinCycle,figFft
+    return figSinCycle, figFft
 
-
+#######################################
+# Q3 drop-down menu
+#######################################
 question3_layout = html.Div([
     html.H3('Complex Data Visualization'),
     dcc.Dropdown(id='dropdown', options=[
@@ -123,6 +137,8 @@ question3_layout = html.Div([
     ]),
     html.Div(id='output_Input_text2')
 ])
+
+
 @my_app.callback(
     Output(component_id='output_Input_text2', component_property='children'),
     [Input(component_id='dropdown', component_property='value')]
