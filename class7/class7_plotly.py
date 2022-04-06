@@ -41,32 +41,34 @@ df6['company'] = 'MSFT'
 frames = [df1,df2,df3,df4,df5,df6]
 result = pd.concat(frames)
 
-# fig = px.line(data_frame=result, x=result.index, y=result.Close, color='company')
-# fig.show(renderer = 'browser')
+# lineplot
+fig = px.line(data_frame=result, x=result.index, y=result.Close, color='company')
+fig.show(renderer = 'browser')
 
-# fig = px.bar(result, x= 'company', y='Close')
-# fig.show(renderer = 'browser')
-
-# fig = px.bar(iris, x='sepal_length',
-#              y='sepal_width',
-#              color='species',
-#              hover_data=['petal_width'],
-#              barmode='stack',
-#              orientation='h')
-# fig.show(renderer = 'browser')
+# barplot
+fig = px.bar(result, x= 'company', y='Close')
+fig.show(renderer = 'browser')
+# stack
+fig = px.bar(iris, x='sepal_length',
+             y='sepal_width',
+             color='species',
+             hover_data=['petal_width'],
+             barmode='stack',
+             orientation='h')
+fig.show(renderer = 'browser')
+# group
+fig = px.bar(tips, x='total_bill', y='day',
+             color='sex',barmode='group')
+fig.show(renderer = 'browser')
+# update_xaxes
+fig = px.bar(tips, x='total_bill', y='day',
+             color='sex',barmode='group').update_xaxes(categoryorder='total descending')
+fig.show(renderer = 'browser')
 #
-# fig = px.bar(tips, x='total_bill', y='day',
-#              color='sex',barmode='group')
-# fig.show(renderer = 'browser')
-#
-# fig = px.bar(tips, x='total_bill', y='day',
-#              color='sex',barmode='group').update_xaxes(categoryorder='total descending')
-# fig.show(renderer = 'browser')
-#
-# fig = px.bar(tips, x='day',
-#              color='smoker')
-# fig.update_xaxes(categoryorder='total ascending')
-# fig.show(renderer = 'browser')
+fig = px.bar(tips, x='day',
+             color='smoker')
+fig.update_xaxes(categoryorder='total ascending')
+fig.show(renderer = 'browser')
 
 # features = iris.columns.tolist()
 # fig = px.scatter_matrix(iris,
@@ -125,14 +127,14 @@ result = pd.concat(frames)
 #               row=1, col=2)
 # fig.show(renderer = 'browser')
 
-fig = make_subplots(rows=1, cols=2,
-                    subplot_titles=('Stock Volume Pie','Stock Volume Bar'),
-                    specs=[[{'type':'pie'},{'type':'bar'}]])
-fig.add_trace(go.Pie(values = result.Volume, labels=result.company),
-              row=1, col=1)
-fig.add_trace(go.Bar(x=result['company'],y=result['Volume']),
-              row=1, col=2)
-fig.show(renderer = 'browser')
+# fig = make_subplots(rows=1, cols=2,
+#                     subplot_titles=('Stock Volume Pie','Stock Volume Bar'),
+#                     specs=[[{'type':'pie'},{'type':'bar'}]])
+# fig.add_trace(go.Pie(values = result.Volume, labels=result.company),
+#               row=1, col=1)
+# fig.add_trace(go.Bar(x=result['company'],y=result['Volume']),
+#               row=1, col=2)
+# fig.show(renderer = 'browser')
 
 
 
