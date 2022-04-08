@@ -187,6 +187,11 @@ calculator = html.Div([
      Input(component_id='calculator-operator', component_property='value')]
 )
 def calculate(firstNumber, secondNumber, calculatorOperator):
+    if firstNumber is None and secondNumber is None:
+        firstNumber = 0
+        secondNumber = 0
+        print('entry 0')
+
     if firstNumber and secondNumber and calculatorOperator is not None:
         if calculatorOperator == 'Addition':
             result = firstNumber + secondNumber
@@ -316,5 +321,5 @@ bar_layout = html.Div([
 # my_app.server.run(debug=True)
 app.run_server(
     debug=True,
-    port=8036,
+    port=8038,
 )

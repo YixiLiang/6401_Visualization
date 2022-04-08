@@ -1,53 +1,70 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
+import dash as dash
+from dash import dcc
+from dash import html
 import plotly.express as px
+from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
+from dash_bootstrap_components._components.Container import Container
+
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+# try running the app with one of the Bootswatch themes e.g.
+# app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
+# app = dash.Dash(external_stylesheets=[dbc.themes.SKETCHY])
 
-#######################################
-# load data
-#######################################
-df = pd.read_csv('weatherAUS.csv')
-# print(df.describe())
-print(df.isna().sum())
-# df.dropna(how='any', inplace=True)
-# print(df.isna().sum())
-df_weather = df.copy()
-colName = df_weather.columns
-largeNaList =[]
-for i in range(len(colName)):
-    columnName = colName[i]
-    naPercentage = df_weather.isna().sum()[columnName]/len(df_weather[columnName])
-    if naPercentage > 0:
-        largeNaList.append(columnName + ': '+ str(naPercentage * 100) + '%')
+# make a reuseable navitem for the different examples
+nav_item = dbc.NavItem(dbc.NavLink("Link", href="#"))
 
-print(largeNaList)
-df_weather.fillna(value=df_weather.mean(), inplace=True)
+# this example that adds a logo to the navbar brand
+logo = dbc.Navbar(
+    dbc.Container(
+        [
+            html.A(
+                # Use row and col to control vertical alignment of logo / brand
+                dbc.Row(
+                    [
+                        dbc.Col(html.Img(src=app.get_asset_url('kangaroo.jpg'), style={'border-radius':'5px', 'margin-right':'10px'}, height="40px",width="40px")),
+                        dbc.Col(dbc.NavbarBrand(children = [html.Font('Rain in Australia', className='fs-3', style={'font-style':'italic'})],className='ms-2')),
+                    ],
+                    align="center",
+                    className="g-0",
+                ),
+                href="/",
+                style={"textDecoration": "none"},
+            ),
+            dbc.NavbarToggler(id="navbar-toggler2", n_clicks=0),
+            dbc.Collapse(
+                dbc.Nav(
+                    [nav_item],
+                    className="ms-auto",
+                    navbar=True,
+                ),
+                id="navbar-collapse2",
+                navbar=True,
+            ),
+        ],
+    ),
+    color="dark",
+    dark=True,
+    className="mb-5",
+)
 
-df_weather["RainToday"] = np.where(df_weather["RainToday"] == "No", 0, 1)
+index_page = html.Div(className='container bg', children=[
+    html.H1('Hello World')
+])
 
-#######################################
-#
-#######################################
-# lineplot
-# fig = px.line(df_weather,'Date','MaxTemp',color='Location')
-# fig.show()
-
-#barplot
-# city = df_weather['Location'].unique()
-# fig = px.bar(data_frame=df_weather, x='Location')
-# fig.show()
-#histogram
-fig = px.histogram(data_frame=df_weather, x='Location',color='RainToday', marginal='violin')
-fig.show()
-
-df_city = df_weather[df_weather['Location'] == 'Albury']
-
-fig = px.histogram(df_city, x='WindGustDir')
-fig.show()
+app.layout = html.Div(
+    [logo, index_page]
+)
 
 
+app.run_server(
+    port=8033,
+    debug=True
+)
 
 
