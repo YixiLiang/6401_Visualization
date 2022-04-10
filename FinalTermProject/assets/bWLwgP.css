@@ -148,8 +148,30 @@ body {
   width: 100%;
   background-image: url("https://images.pexels.com/photos/68704/pexels-photo-68704.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940");
   background-size: cover;
+  position:absolute;
+  background-repeat:no-repeat;
+  filter:blur(5px);
   margin: 0;
+  z-index:-1;
 }
+
+#homePage-title{
+  font-style: italic;
+  font-family: Gabriola;
+  font-size: 100px;
+  color: black;
+  text-align: center;
+}
+
+#homePage-subtitle{
+  font-style: italic;
+  font-family: Times New Roman;
+  font-size: 60px;
+  color: black;
+  text-align: center;
+}
+
+
 
 
 /* Typography

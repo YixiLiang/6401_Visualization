@@ -1,46 +1,48 @@
 import pandas as pd
 import numpy as np
+import dash as dash
+from dash import dcc
+from dash import html
 import plotly.express as px
+from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
 
 
 #######################################
 # load data
 #######################################
 df = pd.read_csv('weatherAUS.csv')
-# print(df.describe())
-print(df.isna().sum())
-# df.dropna(how='any', inplace=True)
-# print(df.isna().sum())
 df_weather = df.copy()
 colName = df_weather.columns
-largeNaList =[]
+largeNaList = []
 for i in range(len(colName)):
     columnName = colName[i]
-    naPercentage = df_weather.isna().sum()[columnName]/len(df_weather[columnName])
-    if naPercentage > 0:
-        largeNaList.append(columnName + ': '+ str(naPercentage * 100) + '%')
+    naPercentage = df_weather.isna().sum()[columnName] / len(df_weather[columnName])
+    if naPercentage > 0.2:
+        largeNaList.append(columnName + ': ' + str(naPercentage * 100) + '%')
 
-print(largeNaList)
-df_weather.fillna(value=df_weather.mean(), inplace=True)
+# print(largeNaList)
+# df_weather.fillna(value=df_weather.mean(), inplace=True)
 
 df_weather["RainToday"] = np.where(df_weather["RainToday"] == "No", 0, 1)
+df_weather['Date'] = pd.to_datetime(df_weather['Date'], format='%Y-%m-%d')
+# get all the city name
+cityName = df_weather['Location'].unique()
+# make a list to store cityName
+cityNameDropdownOptions = []
+for i in range(len(cityName)):
+    dic = {'label': cityName[i], 'value': cityName[i]}
+    cityNameDropdownOptions.append(dic)
+
+# get all the year
+dateYear = [df_weather['Date'][i].year for i in range(len(df_weather['Date']))]
+dateYear = np.unique(dateYear)
+# get start date and end date
+minDate = min(df_weather['Date'])
+maxDate = max(df_weather['Date'])
+
 
 #######################################
 #
 #######################################
-# lineplot
-# fig = px.line(df_weather,'Date','MaxTemp',color='Location')
-# fig.show()
-
-#barplot
-# city = df_weather['Location'].unique()
-# fig = px.bar(data_frame=df_weather, x='Location')
-# fig.show()
-#histogram
-fig = px.histogram(data_frame=df_weather, x='Location',color='RainToday', marginal='violin')
-fig.show()
-
-df_city = df_weather[df_weather['Location'] == 'Albury']
-
-fig = px.histogram(df_city, x='WindGustDir')
-fig.show()
