@@ -25,7 +25,7 @@ for i in range(len(colName)):
 # print(largeNaList)
 # df_weather.fillna(value=df_weather.mean(), inplace=True)
 
-df_weather["RainToday"] = np.where(df_weather["RainToday"] == "No", 0, 1)
+# df_weather["RainToday"] = np.where(df_weather["RainToday"] == "No", 0, 1)
 df_weather['Date'] = pd.to_datetime(df_weather['Date'], format='%Y-%m-%d')
 # get all the city name
 cityName = df_weather['Location'].unique()
