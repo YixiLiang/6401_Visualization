@@ -55,6 +55,7 @@ plt.show()
 
 # d
 # original
+# Singular value decomposition: two value become one value
 pca_original = PCA(svd_solver='full')
 pca_original.fit(X)
 X_PCA_original = pca_original.transform(X)
