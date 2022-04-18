@@ -17,6 +17,8 @@ from numpy import linalg as LA
 from statsmodels.graphics.gofplots import qqplot
 import scipy.stats as st
 
+import matplotlib.patches as mpatches
+
 #######################################
 # load data
 #######################################
@@ -41,7 +43,7 @@ percentageNa.loc[1] = largeNaList
 print(percentageNa)
 # df_weather.fillna(value=df_weather.mean(), inplace=True)
 # df_weather["RainToday"] = np.where(df_weather["RainToday"] == "No", 0, 1)
-dropColName.append('RainTomorrow')
+# dropColName.append('RainTomorrow')
 df_weather.drop(dropColName, axis=1, inplace=True)
 df_weather.dropna(how='any', inplace=True)
 print(df_weather.isna().sum())
@@ -246,11 +248,177 @@ numericalColName = df_weather.select_dtypes(include='number').columns
 # Data visualization
 #######################################
 sns.set_theme(style='darkgrid')
-showCityName = ['Albury']
+showCityName = ['Albury','BadgerysCreek','Cobar']
 df_showCity = df_weather[df_weather['Location'].isin(showCityName)]
+#######################################
 # a. Line-plot
-plt.figure(figsize=(16,9))
-sns.lineplot(data=df_showCity, x='Date', y='MinTemp', hue='Location')
-plt.title('Lineplot of minimum temperature in degrees celsius in Albury')
+df_showCity_linplot = df_showCity[df_showCity['Date']>'2017-01-01']
+plt.figure()
+sns.lineplot(data=df_showCity_linplot, x='Date', y='MinTemp', hue='Location')
+plt.title('Line plot of minimum temperature in degrees Celsius hue city')
 plt.show()
+#######################################
 # Bar-plot : stack, group
+# tips = sns.load_dataset("tips")
+# stack
+plt.figure()
+bar1 = sns.barplot(data=df_showCity,y='Rainfall', x='Location',estimator=sum, color='darkblue')
+rain = df_showCity[df_showCity.RainTomorrow=='Yes']
+bar2 = sns.barplot(data=rain,y='Rainfall', x="Location",estimator=sum, ci=None, color='lightblue')
+# add legend
+top_bar = mpatches.Patch(color='darkblue', label='Rain Tomorrow = Yes')
+bottom_bar = mpatches.Patch(color='lightblue', label='Rain Tomorrow = No')
+plt.title('Stack bar plot of today rainfall in different cities hue by rain tomorrow')
+plt.legend(handles=[top_bar, bottom_bar])
+plt.show()
+# This plot can show whether today rainfall affect rain tomorrow
+# group
+plt.figure()
+sns.barplot(data=df_showCity, x='Location', y='MinTemp', hue='RainToday')
+plt.title('MinTemp in different cities group by RainToday')
+plt.show()
+# This plot can show the relation between minimum temperature and rain in different cities.
+#######################################
+# c. Count-plot
+plt.figure()
+sns.countplot(data=df_weather, x='RainToday')
+plt.title('Count plot of Rain Today')
+plt.show()
+#######################################
+# d. Cat-plot
+plt.figure()
+sns.catplot(data=df_showCity, x='Location', y='MaxTemp', col='RainToday')
+# plt.title('Cat-plot of MaxTemp in different cities divided by RainToday')
+plt.show()
+#######################################
+# e. Pie-chart
+plt.figure()
+# Pie chart, where the slices will be ordered and plotted counter-clockwise:
+labels = df_weather['WindGustDir'].value_counts().index
+sizes = df_weather['WindGustDir'].value_counts().values
+explode = [0]*len(labels)
+
+fig1, ax1 = plt.subplots()
+ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+        shadow=True, startangle=90)
+ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+plt.title('Pie chart of WindGustDir')
+plt.show()
+#######################################
+# f. Displot
+plt.figure()
+sns.displot(data=df_showCity, x='MaxTemp', hue='Location', multiple='stack')
+plt.title('Distplot of MaxTemp hue by Location')
+plt.show()
+#######################################
+# g. Pair plot
+df_showCity_pairplot = df_showCity_linplot[['Location', 'MinTemp', 'MaxTemp', 'Rainfall', 'WindGustSpeed']]
+plt.figure()
+sns.pairplot(data=df_showCity_pairplot, hue="Location")
+# plt.title('Pair plot about MinTemp, MaxTemp, Rainfall, WindGustSpeed hue by city')
+plt.show()
+#######################################
+# h. Heatmap
+df_showCity_heatmap = df_showCity.copy()
+df_showCity_heatmap = df_showCity_heatmap[['Date', 'MaxTemp']]
+df_showCity_heatmap_new = df_showCity_heatmap.groupby(pd.PeriodIndex(df_showCity_heatmap['Date'], freq="M"))['MaxTemp'].mean()
+df_showCity_heatmap_new = pd.DataFrame(df_showCity_heatmap_new)
+df_showCity_heatmap_new['Date'] = df_showCity_heatmap_new.index
+df_showCity_heatmap_new['year'] = df_showCity_heatmap_new['Date'].dt.year
+df_showCity_heatmap_new['month'] = df_showCity_heatmap_new['Date'].dt.month
+df_showCity_heatmap_new = df_showCity_heatmap_new.pivot('month', 'year', 'MaxTemp')
+
+plt.figure()
+sns.heatmap(df_showCity_heatmap_new, annot=True, fmt=".1f")
+plt.title('Heatmap of MaxTemp average in month and year')
+plt.show()
+#######################################
+# i. Hist-plot
+plt.figure()
+sns.histplot(data=df_showCity, x="WindGustSpeed", kde=True, bins=10)
+plt.xlabel('WindGustSpeed (km/h)')
+plt.title('Hist-plot of WindGustSpeed')
+plt.show()
+#######################################
+# j. QQ-plot
+plt.figure()
+qqplot(data=df_showCity['MinTemp'], line='s')
+plt.title('QQ-plot of MinTemp')
+plt.show()
+#######################################
+# k. Kernal density estimate
+plt.figure()
+sns.kdeplot(
+    data=df_showCity, x="MinTemp", y="WindGustSpeed", hue="Location", fill=True,
+)
+plt.title('Kde plot of WindGustSpeed versus MinTemp hue by city')
+plt.show()
+#######################################
+# l. Scatter plot and regression line using sklearn
+plt.figure()
+sns.regplot(x="MinTemp", y="WindGustSpeed", data=df_showCity_linplot)
+plt.title('Scatter plot of WindGustSpeed versus MinTemp and regression line')
+plt.show()
+#######################################
+# m. Multivariate Box plot
+plt.figure()
+sns.boxplot(x="Location", y="MinTemp", data=df_showCity)
+plt.title('Box plot of MinTemp in different cities')
+plt.show()
+#######################################
+# n. Area plot
+df_showCity_area = df_showCity[df_showCity['Date'] > '2017-06-01']
+rainfallA = df_showCity_area[df_showCity_area['Location'] == 'Albury']['WindGustSpeed']
+rainfallB = df_showCity_area[df_showCity_area['Location'] == 'Albury']['WindSpeed9am']
+rainfallC = df_showCity_area[df_showCity_area['Location'] == 'Albury']['WindSpeed3pm']
+plt.figure(figsize=(12,9))
+plt.stackplot(df_showCity_area[df_showCity_area['Location'] == 'Albury']['Date'], rainfallA, rainfallB, rainfallC)
+plt.title('Area plot of WindGustSpeed, WindSpeed9am and WindSpeed3pm in Albury')
+plt.ylabel('Wind gust speed (km/h)')
+plt.xlabel('Date')
+plt.legend(labels=["WindGustSpeed","WindSpeed9am",'WindSpeed3pm'])
+plt.show()
+#######################################
+# o. Violin plot
+plt.figure()
+sns.violinplot(x="Location", y="WindGustSpeed", data=df_showCity)
+plt.title('Violin plot of WindGustSpeed in different cities')
+plt.show()
+#######################################
+# Subplots
+#######################################
+df_showCity_subplot = df_showCity[df_showCity['Date'] > '2017-05-01']
+df_showCity_subplot = df_showCity_subplot[df_showCity_subplot['Location'] == 'Albury']
+
+
+plt.figure(figsize=(16,9))
+plt.subplot(3,2,1)
+sns.lineplot(data=df_showCity_subplot, x='Date', y='Rainfall')
+
+plt.subplot(3,2,2)
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['MinTemp'], color='b')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['MaxTemp'], color='r')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Temp9am'], color='g')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Temp3pm'], color='y')
+
+plt.subplot(3,2,3)
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindGustSpeed'], color='g')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindSpeed9am'], color='r')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindSpeed3pm'], color='b')
+
+plt.subplot(3,2,4)
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindGustDir'], color='g')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindDir9am'], color='r')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindDir3pm'], color='b')
+
+plt.subplot(3,2,5)
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Humidity9am'], color='r')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Humidity3pm'], color='b')
+
+plt.subplot(3,2,6)
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Pressure9am'], color='r')
+plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Pressure3pm'], color='b')
+plt.show()
+
+#######################################
+#######################################
