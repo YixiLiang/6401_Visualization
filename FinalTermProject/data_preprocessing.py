@@ -54,7 +54,7 @@ showCleanedDataset = pd.DataFrame(df_weather.head())
 # show the basic information of the columns
 showCleanedDatasetDes = pd.DataFrame(df_weather.describe())
 #######################################
-# change Date column to datetime type
+# Change Date column to datetime type
 #######################################
 df_weather['Date'] = pd.to_datetime(df_weather['Date'], format='%Y-%m-%d')
 # get all the city name
@@ -241,9 +241,12 @@ numericalColName = df_weather.select_dtypes(include='number').columns
 # Statistics kde
 #######################################
 # penguins = sns.load_dataset("penguins")
-# df_kde = df_weather[numericalColName]
-# sns.pairplot(df_kde, kind="kde")
-# plt.show()
+df_kde = df_weather[['Date','Location', 'MinTemp','MaxTemp','Rainfall','WindGustSpeed']]
+showCityName = ['Albury','BadgerysCreek','Cobar']
+df_kde = df_kde[(df_kde['Date'] > '2017-01-01') & (df_kde['Location'].isin(showCityName))]
+sns.pairplot(df_kde, kind="kde", hue='Location')
+plt.suptitle('Multivariate kernel density estimate plot')
+plt.show()
 #######################################
 # Data visualization
 #######################################
@@ -387,37 +390,60 @@ plt.show()
 #######################################
 # Subplots
 #######################################
-df_showCity_subplot = df_showCity[df_showCity['Date'] > '2017-05-01']
+df_showCity_subplot = df_showCity[(df_showCity['Date'] > '2017-05-15') & (df_showCity['Date'] < '2017-06-01')]
 df_showCity_subplot = df_showCity_subplot[df_showCity_subplot['Location'] == 'Albury']
 
 
 plt.figure(figsize=(16,9))
 plt.subplot(3,2,1)
 sns.lineplot(data=df_showCity_subplot, x='Date', y='Rainfall')
+plt.title('Line plot of Rainfall')
 
 plt.subplot(3,2,2)
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['MinTemp'], color='b')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['MaxTemp'], color='r')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Temp9am'], color='g')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Temp3pm'], color='y')
+plt.legend(labels=['MinTemp','MaxTemp','Temp9am','Temp3pm'])
+plt.ylabel('Degree of Celsius')
+plt.xlabel('Date')
+plt.title('Line plot of Temperature')
 
 plt.subplot(3,2,3)
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindGustSpeed'], color='g')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindSpeed9am'], color='r')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindSpeed3pm'], color='b')
+plt.legend(labels=['WindGustSpeed','WindSpeed9am','WindSpeed3pm'])
+plt.ylabel('Wind speed (km/h)')
+plt.xlabel('Date')
+plt.title('Line plot of WindSpeed')
 
 plt.subplot(3,2,4)
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindGustDir'], color='g')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindDir9am'], color='r')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['WindDir3pm'], color='b')
+plt.legend(labels=['WindGustDir','WindDir9am','WindDir3pm'])
+plt.ylabel('Wind Gust Direction')
+plt.xlabel('Date')
+plt.title('Line plot of Wind Speed Direction')
 
 plt.subplot(3,2,5)
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Humidity9am'], color='r')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Humidity3pm'], color='b')
+plt.legend(labels=['Humidity9am','Humidity3pm'])
+plt.ylabel('Humidity (percent)')
+plt.xlabel('Date')
+plt.title('Line plot of Humidity')
 
 plt.subplot(3,2,6)
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Pressure9am'], color='r')
 plt.plot(df_showCity_subplot['Date'], df_showCity_subplot['Pressure3pm'], color='b')
+plt.legend(labels=['Pressure9am','Pressure9am'])
+plt.ylabel('Atmospheric pressure (hpa) ')
+plt.xlabel('Date')
+plt.title('Line plot of Pressure')
+
+plt.tight_layout()
 plt.show()
 
 #######################################
