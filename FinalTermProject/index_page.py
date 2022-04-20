@@ -123,16 +123,16 @@ def display_city_Temp(clicks, cityName, start_date, end_date):
     figWindGustSpeed = go.Figure()
     figRainToday = go.Figure()
     if clicks is not None:
-        # figure about MinTemp and MaxTemp
+        # figTemp figure about MinTemp and MaxTemp
         figTemp.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
             (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                        df_weather['Date'] <= end_date)][
+                    df_weather['Date'] <= end_date)][
             'MinTemp'],
                                      mode='lines',
                                      name='MinTemp'))
         figTemp.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
             (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                        df_weather['Date'] <= end_date)][
+                    df_weather['Date'] <= end_date)][
             'MaxTemp'],
                                      mode='lines',
                                      name='MaxTemp')),
@@ -153,26 +153,26 @@ def display_city_Temp(clicks, cityName, start_date, end_date):
         figTemp.update_layout(title=f'Highest and Lowest Temperatures in {cityName}',
                               xaxis_title='Date',
                               yaxis_title='Temperature (degrees C)')
-        # figure about Rainfall
+        # figRainfall figure about Rainfall
         figRainfall.add_trace(go.Violin(y=df_weather[
             (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                        df_weather['Date'] <= end_date)]['Rainfall'], box_visible=True, line_color='black',
+                    df_weather['Date'] <= end_date)]['Rainfall'], box_visible=True, line_color='black',
                                         meanline_visible=True, fillcolor='lightseagreen', opacity=0.6,
                                         x0='rainfall'))
         figRainfall.update_layout(title=f'Violin of Rain fall in{cityName}')
-        # figure about Wind Gust Direction
+        # figWindGustDir figure about Wind Gust Direction
         labels = df_weather[(df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)]['WindGustDir'].value_counts().keys().tolist()
+                df_weather['Date'] <= end_date)]['WindGustDir'].value_counts().keys().tolist()
         values = df_weather[(df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)]['WindGustDir'].value_counts().tolist()
+                df_weather['Date'] <= end_date)]['WindGustDir'].value_counts().tolist()
         figWindGustDir.add_trace(go.Pie(labels=labels, values=values))
         figWindGustDir.update_layout(title=f'Pie plot of wind direction in {cityName}')
         # figure about Wind Gust Speed
         figWindGustSpeed.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
             (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                        df_weather['Date'] <= end_date)]['WindGustSpeed'],
+                    df_weather['Date'] <= end_date)]['WindGustSpeed'],
                                               mode='lines',
-                                            name='WindGustSpeed'))
+                                              name='WindGustSpeed'))
         figWindGustSpeed.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
             (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
                     df_weather['Date'] <= end_date)]['WindSpeed9am'],
@@ -186,8 +186,6 @@ def display_city_Temp(clicks, cityName, start_date, end_date):
                                               name='WindSpeed3pm'
                                               ))
 
-
-
         figWindGustSpeed.update_layout(title=f'Line plot of wind speed in {cityName}')
         # figure about Rain Today
         labels = df_weather[(df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
@@ -196,7 +194,6 @@ def display_city_Temp(clicks, cityName, start_date, end_date):
                 df_weather['Date'] <= end_date)]['RainToday'].value_counts().tolist()
         figRainToday.add_trace(go.Pie(labels=labels, values=values))
         figRainToday.update_layout(title=f'Pie plot of rain today in {cityName}')
-
 
     city_content_layout = html.Div([
         dbc.Row(dbc.Col(dcc.Graph(figure=figTemp))),
@@ -210,6 +207,104 @@ def display_city_Temp(clicks, cityName, start_date, end_date):
 
 
 #######################################
+# core_component section
+#######################################
+# simplify dataset
+df_core_component = df_weather[['Date', 'Location', 'MinTemp', 'MaxTemp', 'Rainfall', 'WindGustSpeed']]
+showCityName = ['Albury', 'BadgerysCreek', 'Cobar']
+df_core_component_city_time = df_core_component[
+    (df_core_component['Date'] > '2017-01-01') & (df_core_component['Location'].isin(showCityName))]
+df_core_component_city = df_core_component[df_core_component['Location'].isin(showCityName)]
+#######################################
+# Tabs
+figTabsA = go.Figure()
+cityNameTab = 'Albury'
+figTabsA.add_trace(
+    go.Scatter(x=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['Date'],
+               y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['MinTemp'],
+               mode='lines',
+               name='Albury'))
+figTabsA.update_layout(title=f'Line plot of MinTemp in {cityNameTab}',
+                       xaxis_title='Date',
+                       yaxis_title='Temperature (degrees C)')
+
+figTabsB = go.Figure()
+cityNameTab = 'BadgerysCreek'
+figTabsB.add_trace(
+    go.Scatter(x=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['Date'],
+               y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['MinTemp'],
+               mode='lines',
+               name='BadgerysCreek'))
+figTabsB.update_layout(title=f'Line plot of MinTemp in {cityNameTab}',
+                       xaxis_title='Date',
+                       yaxis_title='Temperature (degrees C)')
+
+figTabsC = go.Figure()
+cityNameTab = 'Cobar'
+figTabsC.add_trace(
+    go.Scatter(x=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['Date'],
+               y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['MinTemp'],
+               mode='lines',
+               name='Cobar'))
+figTabsC.update_layout(title=f'Line plot of MinTemp in {cityNameTab}',
+                       xaxis_title='Date',
+                       yaxis_title='Temperature (degrees C)')
+
+tabs_layout = html.Div([
+    html.Div(html.P('Multiple Tabs', className='h2')),
+    dbc.Tabs(
+        [
+            dbc.Tab(label="Albury", tab_id='tab-1'),
+            dbc.Tab(label="BadgerysCreek", tab_id='tab-2'),
+            dbc.Tab(label="Cobar", tab_id='tab-3'),
+        ],
+        id='tabs',
+        active_tab='tab-1'
+    ),
+    dcc.Graph(id='tabs_content')
+])
+
+
+@app.callback(
+    Output(component_id="tabs_content", component_property='figure'),
+    [Input(component_id='tabs', component_property='active_tab')]
+)
+def switch_tab(tab_id):
+    if tab_id == 'tab-1':
+        return figTabsA
+    elif tab_id == 'tab-2':
+        return figTabsB
+    elif tab_id == 'tab-3':
+        return figTabsC
+    else:
+        return None
+
+
+#######################################
+# Range slider
+
+
+rangeSlider_layout = html.Div([
+    html.Div(html.P('Range slider', className='h2')),
+    dcc.Graph(id='rangeSlider_content'),
+    dcc.RangeSlider(id='rangeSlider_Core_component', min=dateYear.min(), max=dateYear.max(), step=1,
+                    marks={
+                        int(i):str(i) for i in range(dateYear.min(),dateYear.max()+1)
+                    },
+                    value=[dateYear.min(), dateYear.max()])
+])
+
+#######################################
+# core_component main page
+core_component = html.Div([
+    html.Div(className='container', children=[
+        dbc.Row(dbc.Col(html.P("Hello, Welcome to Core Component!", className='head-title', ))),
+        tabs_layout,
+        rangeSlider_layout
+    ])
+])
+
+#######################################
 # index-page
 #######################################
 
@@ -218,7 +313,7 @@ nav = dbc.Nav(
     [
         dcc.Location(id='url', refresh=False),
         dbc.NavItem(dbc.NavLink("City", id='city-page', active=True, href="/city-page")),
-        dbc.NavItem(dbc.NavLink("Temperature", href="#")),
+        dbc.NavItem(dbc.NavLink("Core Compeonents", id='core-component', active=True, href="/core-component")),
         dbc.NavItem(dbc.NavLink("Rain", href="#")),
         dbc.NavItem(dbc.NavLink("Disabled", disabled=True, href="#")),
         dbc.DropdownMenu(
@@ -237,6 +332,8 @@ nav = dbc.Nav(
 def navLink(pathname):
     if pathname == '/city-page':
         return city_page
+    elif pathname == '/core-component':
+        return core_component
     else:
         return index_page_main
 
@@ -323,7 +420,7 @@ index_page_main = html.Div([
     html.Div(className='container', children=[
         dbc.Row(
             dbc.Col(
-                html.Div('Rain in Australia', id='homePage-title'),
+                html.Div('Rain in Australia', className='head-title'),
             )
         ),
         dbc.Row(
