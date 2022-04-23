@@ -3,11 +3,16 @@ import numpy as np
 import dash as dash
 from dash import dcc
 from dash import html
+from dash import dash_table
 import plotly.express as px
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from dash_bootstrap_components._components.Container import Container
 import plotly.graph_objects as go
+import datetime
+import io
+import base64
+import plotly.figure_factory as ff
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -122,84 +127,88 @@ def display_city_Temp(clicks, cityName, start_date, end_date):
     figWindGustDir = go.Figure()
     figWindGustSpeed = go.Figure()
     figRainToday = go.Figure()
+
+    df_display_city = df_weather[(df_weather['Date'] >= start_date) & (df_weather['Date'] <= end_date)]
+    df_display_city = df_display_city[df_display_city['Location'] == cityName]
     if clicks is not None:
         # figTemp figure about MinTemp and MaxTemp
-        figTemp.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)][
-            'MinTemp'],
-                                     mode='lines',
-                                     name='MinTemp'))
-        figTemp.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)][
-            'MaxTemp'],
-                                     mode='lines',
-                                     name='MaxTemp')),
+        figTemp.add_trace(go.Scatter(
+            x=df_display_city['Date'],
+            y=df_display_city['MinTemp'],
+            mode='lines',
+            name='MinTemp'))
 
-        figTemp.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)][
-            'Temp9am'],
-                                     mode='lines',
-                                     name='Temp9am')),
-        figTemp.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)][
-            'Temp3pm'],
-                                     mode='lines',
-                                     name='Temp3pm')),
+        figTemp.add_trace(go.Scatter(
+            x=df_display_city['Date'],
+            y=df_display_city['MaxTemp'],
+            mode='lines',
+            name='MaxTemp'))
+
+        figTemp.add_trace(go.Scatter(
+            x=df_display_city['Date'],
+            y=df_display_city['Temp9am'],
+            mode='lines',
+            name='Temp9am'))
+
+        figTemp.add_trace(go.Scatter(
+            x=df_display_city['Date'],
+            y=df_display_city['Temp3pm'],
+            mode='lines',
+            name='Temp3pm'))
 
         figTemp.update_layout(title=f'Highest and Lowest Temperatures in {cityName}',
                               xaxis_title='Date',
                               yaxis_title='Temperature (degrees C)')
+
         # figRainfall figure about Rainfall
-        figRainfall.add_trace(go.Violin(y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)]['Rainfall'], box_visible=True, line_color='black',
+        figRainfall.add_trace(go.Violin(y=df_display_city['Rainfall'], box_visible=True, line_color='black',
                                         meanline_visible=True, fillcolor='lightseagreen', opacity=0.6,
                                         x0='rainfall'))
         figRainfall.update_layout(title=f'Violin of Rain fall in{cityName}')
+
         # figWindGustDir figure about Wind Gust Direction
-        labels = df_weather[(df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                df_weather['Date'] <= end_date)]['WindGustDir'].value_counts().keys().tolist()
-        values = df_weather[(df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                df_weather['Date'] <= end_date)]['WindGustDir'].value_counts().tolist()
+        labels = df_display_city['WindGustDir'].value_counts().keys().tolist()
+        values = df_display_city['WindGustDir'].value_counts().tolist()
         figWindGustDir.add_trace(go.Pie(labels=labels, values=values))
         figWindGustDir.update_layout(title=f'Pie plot of wind direction in {cityName}')
+
         # figure about Wind Gust Speed
-        figWindGustSpeed.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)]['WindGustSpeed'],
-                                              mode='lines',
-                                              name='WindGustSpeed'))
-        figWindGustSpeed.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)]['WindSpeed9am'],
-                                              mode='lines',
-                                              name='WindSpeed9am'
-                                              ))
-        figWindGustSpeed.add_trace(go.Scatter(x=df_weather['Date'], y=df_weather[
-            (df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                    df_weather['Date'] <= end_date)]['WindSpeed3pm'],
-                                              mode='lines',
-                                              name='WindSpeed3pm'
-                                              ))
+        figWindGustSpeed.add_trace(go.Scatter(
+            x=df_display_city['Date'],
+            y=df_display_city['WindGustSpeed'],
+            mode='lines',
+            name='WindGustSpeed'))
+
+        figWindGustSpeed.add_trace(go.Scatter(
+            x=df_display_city['Date'],
+            y=df_display_city['WindSpeed9am'],
+            mode='lines',
+            name='WindSpeed9am'))
+
+        figWindGustSpeed.add_trace(go.Scatter(
+            x=df_display_city['Date'],
+            y=df_display_city['WindSpeed3pm'],
+            mode='lines',
+            name='WindSpeed3pm'))
 
         figWindGustSpeed.update_layout(title=f'Line plot of wind speed in {cityName}')
+
         # figure about Rain Today
-        labels = df_weather[(df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                df_weather['Date'] <= end_date)]['RainToday'].value_counts().keys().tolist()
-        values = df_weather[(df_weather['Location'] == cityName) & (df_weather['Date'] >= start_date) & (
-                df_weather['Date'] <= end_date)]['RainToday'].value_counts().tolist()
+        labels = df_display_city['RainToday'].value_counts().keys().tolist()
+        values = df_display_city['RainToday'].value_counts().tolist()
         figRainToday.add_trace(go.Pie(labels=labels, values=values))
         figRainToday.update_layout(title=f'Pie plot of rain today in {cityName}')
 
     city_content_layout = html.Div([
+        html.Div(html.P('Line - plot', className='h2')),
         dbc.Row(dbc.Col(dcc.Graph(figure=figTemp))),
+        html.Div(html.P('Violin - plot', className='h2')),
         dbc.Row(dbc.Col(dcc.Graph(figure=figRainfall))),
+        html.Div(html.P('Pie - plot', className='h2')),
         dbc.Row(dbc.Col(dcc.Graph(figure=figWindGustDir))),
+        html.Div(html.P('Line - plot', className='h2')),
         dbc.Row(dbc.Col(dcc.Graph(figure=figWindGustSpeed))),
+        html.Div(html.P('Pie - plot', className='h2')),
         dbc.Row(dbc.Col(dcc.Graph(figure=figRainToday))),
     ])
 
@@ -227,42 +236,10 @@ for i in range(len(showFeature)):
     dic = {'label': showFeature[i], 'value': showFeature[i]}
     showFeatureOptions.append(dic)
 #######################################
-# Tabs
-# figTabsA = go.Figure()
-# cityNameTab = 'Albury'
-# figTabsA.add_trace(
-#     go.Scatter(x=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['Date'],
-#                y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['MinTemp'],
-#                mode='lines',
-#                name='Albury'))
-# figTabsA.update_layout(title=f'Line plot of MinTemp in {cityNameTab}',
-#                        xaxis_title='Date',
-#                        yaxis_title='Temperature (degrees C)')
-#
-# figTabsB = go.Figure()
-# cityNameTab = 'BadgerysCreek'
-# figTabsB.add_trace(
-#     go.Scatter(x=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['Date'],
-#                y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['MinTemp'],
-#                mode='lines',
-#                name='BadgerysCreek'))
-# figTabsB.update_layout(title=f'Line plot of MinTemp in {cityNameTab}',
-#                        xaxis_title='Date',
-#                        yaxis_title='Temperature (degrees C)')
-#
-# figTabsC = go.Figure()
-# cityNameTab = 'Cobar'
-# figTabsC.add_trace(
-#     go.Scatter(x=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['Date'],
-#                y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNameTab]['MinTemp'],
-#                mode='lines',
-#                name='Cobar'))
-# figTabsC.update_layout(title=f'Line plot of MinTemp in {cityNameTab}',
-#                        xaxis_title='Date',
-#                        yaxis_title='Temperature (degrees C)')
+# Tabs + check box + Multiple Division
 
 tabs_layout = html.Div([
-    html.Div(html.P('Multiple Tabs', className='h2')),
+    html.Div(html.P('Multiple Tabs + Check box + Multiple Division', className='h2')),
     dbc.Tabs(
         [
             dbc.Tab(label=showFeature[0], tab_id=showFeature[0]),
@@ -274,7 +251,7 @@ tabs_layout = html.Div([
         active_tab=showFeature[0]
     ),
     dcc.Checklist(
-        id = 'checkbox_core',
+        id='checkbox_core',
         options=showCityNameDropdownOptions,
         value=[showCityName[0]]
     ),
@@ -287,18 +264,19 @@ tabs_layout = html.Div([
     [Input(component_id='tabs', component_property='active_tab'),
      Input(component_id='checkbox_core', component_property='value')]
 )
-def switch_tab(featureName,cityNames):
+def switch_tab(featureName, cityNames):
     figTabs = go.Figure()
 
     for i in range(len(cityNames)):
         figTabs.add_trace(
             go.Scatter(x=df_core_component_city_time[df_core_component_city_time['Location'] == cityNames[i]]['Date'],
-                       y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNames[i]][featureName],
+                       y=df_core_component_city_time[df_core_component_city_time['Location'] == cityNames[i]][
+                           featureName],
                        mode='lines',
                        name=cityNames[i]))
 
     figTabs.update_layout(title=f'Line plot of {featureName} hue by city',
-                           xaxis_title='Date')
+                          xaxis_title='Date')
     if featureName == 'MinTemp' or featureName == 'MaxTemp':
         figTabs.update_layout(yaxis_title='Temperature (degrees C)')
     elif featureName == 'Rainfall':
@@ -315,7 +293,7 @@ def switch_tab(featureName,cityNames):
 # Radio items
 
 rangeSlider_layout = html.Div([
-    html.Div(html.P('Range slider', className='h2')),
+    html.Div(html.P('Range slider + Drop down menu + Radio items', className='h2')),
     dcc.Dropdown(id='dropdown_core', options=showCityNameDropdownOptions, value=showCityName[0],
                  placeholder='Select the city that you want to see'),
     dcc.RadioItems(
@@ -357,10 +335,214 @@ def display_rangeSlider(rangeSlider, cityName, featureName):
 
 
 #######################################
-# Drop down menu
-dropDownMenu_layout = html.Div([
-    dcc.Dropdown(id='dropdown_core')
+# Button + DataPickerRange
+datePickerRange_layout = html.Div([
+    html.Div(html.P('DataPickerRange + Button', className='h2')),
+    dbc.Row([
+        dbc.Label("City", width=1),
+        dbc.Col(
+            dcc.Dropdown(id='cityName_dropDownMenu_core',
+                         options=showCityNameDropdownOptions,
+                         value=showCityName[0]),
+        ),
+    ], className="mb-3"),
+    dbc.Row([
+        dbc.Label("Date", width=1),
+        dbc.Col(
+            dcc.DatePickerRange(id='dataPickerRange_core',
+                                min_date_allowed=minDate,
+                                max_date_allowed=maxDate,
+                                start_date=minDate,
+                                end_date=maxDate,
+                                display_format='Y-M-D',
+                                start_date_placeholder_text='Y-M-D'
+                                ),
+        ),
+    ], className="mb-3"),
+    dbc.Row(
+        [
+            dbc.Col(
+                dbc.Button("Submit", id='button_core', color="primary"), width="auto"
+            ),
+        ], className="mb-3"),
+    dcc.Graph(id='dataPickerRange_graph'),
+
 ])
+
+
+@app.callback(
+    Output(component_id='dataPickerRange_graph', component_property='figure'),
+    [Input(component_id='button_core', component_property='n_clicks')],
+    [State(component_id='cityName_dropDownMenu_core', component_property='value'),
+     State(component_id='dataPickerRange_core', component_property='start_date'),
+     State(component_id='dataPickerRange_core', component_property='end_date')]
+)
+def display_dataPickerRange(clicks, cityName, start_date, end_date):
+    # print(f'start_date: {start_date}, end_date: {end_date}')
+    df_dataPickerRange = df_core_component_city[(df_core_component_city['Date'] >= start_date) & (
+            df_core_component_city['Date'] <= end_date)]
+    df_dataPickerRange = df_dataPickerRange[df_dataPickerRange['Location'] == cityName]
+    fig = go.Figure()
+    if clicks is not None:
+        fig.add_trace(go.Scatter(x=df_dataPickerRange['Date'],
+                                 y=df_dataPickerRange['MinTemp'],
+                                 mode='lines', name='MinTemp')),
+        fig.add_trace(go.Scatter(x=df_dataPickerRange['Date'],
+                                 y=df_dataPickerRange['MaxTemp'],
+                                 mode='lines', name='MaxTemp')),
+        fig.update_layout(title=f'Highest and Lowest Temperatures in {cityName}',
+                          xaxis_title='Date',
+                          yaxis_title='Temperature (degrees C)')
+    return fig
+
+
+#######################################
+# Input field + Output field + Text area
+
+email_input = html.Div(
+    [
+        dbc.Input(id="input-email-core", type="email", value=""),
+        dbc.FormText("We only accept gmail..."),
+        dbc.FormFeedback("That looks like a gmail address :-)", type="valid"),
+        dbc.FormFeedback(
+            "Sorry, we only accept gmail for some reason...",
+            type="invalid",
+        ),
+    ]
+)
+
+inputOutput_layout = html.Div([
+    html.Div(html.P('Input field + Output field + Text area', className='h2')),
+    html.Div([
+        dbc.Form([
+            dbc.Label("Email", width="auto"),
+            email_input,
+            dbc.Label("Password", width="auto"),
+            dbc.Input(id='input-password-core', type="password", placeholder="Enter password"),
+            dbc.Label("Textarea", width="auto"),
+            dbc.Textarea(id='input-textarea-core'),
+            dbc.Button("Submit", id='input-button-core', color="primary", style={'margin-top': '10px'}),
+            html.Div(id='result-input')
+        ])
+    ])
+
+])
+
+
+@app.callback(
+    [Output("input-email-core", "valid"), Output("input-email-core", "invalid")],
+    [Input("input-email-core", "value")],
+)
+def check_validity(text):
+    if text:
+        is_gmail = text.endswith("@gmail.com")
+        return is_gmail, not is_gmail
+    return False, False
+
+
+@app.callback(
+    Output(component_id='result-input', component_property='children'),
+    [Input(component_id='input-button-core', component_property='n_clicks')],
+    [State(component_id='input-email-core', component_property='value'),
+     State(component_id='input-password-core', component_property='value'),
+     State(component_id='input-textarea-core', component_property='value')]
+)
+def show_input(clicks, email, password, textarea):
+    if clicks is not None:
+        return f'email : {email}, password : {password}, textarea : {textarea}'
+    return f'results are empty'
+
+
+#######################################
+# upload + download
+updownload_layout = html.Div([
+    html.Div(html.P('Upload + Download component', className='h2')),
+    html.Div(html.P('Upload csv', className='h6')),
+    dcc.Upload(
+        id='upload-data',
+        children=html.Div([
+            'Drag and Drop or ',
+            html.A('Select Files')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        # Allow multiple files to be uploaded
+        multiple=True
+    ),
+    html.Div(id='output-data-upload'),
+    html.Br(),
+    html.Div(html.P('Download button', className='h6')),
+    dbc.Button("Download dataset", id="btn-download-txt", color="secondary", className="me-1"),
+    dcc.Download(id="download-core")
+])
+
+
+@app.callback(
+    Output("download-core", "data"),
+    Input("btn-download-txt", "n_clicks"),
+    prevent_initial_call=True,
+)
+def func(n_clicks):
+    return dcc.send_data_frame(df.to_csv, filename="weatherAUS.csv")
+
+
+def parse_contents(contents, filename, date):
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+
+    return html.Div([
+        html.H5(filename),
+        html.H6(datetime.datetime.fromtimestamp(date)),
+
+        dash_table.DataTable(
+            df.to_dict('records'),
+            [{'name': i, 'id': i} for i in df.columns]
+        ),
+
+        html.Hr(),  # horizontal line
+
+        # For debugging, display the raw contents provided by the web browser
+        html.Div('Raw Content'),
+        html.Pre(contents[0:200] + '...', style={
+            'whiteSpace': 'pre-wrap',
+            'wordBreak': 'break-all'
+        })
+    ])
+
+
+@app.callback(Output('output-data-upload', 'children'),
+              Input('upload-data', 'contents'),
+              State('upload-data', 'filename'),
+              State('upload-data', 'last_modified'))
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+        return children
+
 
 #######################################
 # core_component main page
@@ -369,7 +551,239 @@ core_component = html.Div([
         dbc.Row(dbc.Col(html.P("Hello, Welcome to Core Component!", className='head-title', ))),
         dbc.Row(dbc.Col(tabs_layout)),
         dbc.Row(dbc.Col(rangeSlider_layout)),
-        dbc.Row(dbc.Col()),
+        dbc.Row(dbc.Col(datePickerRange_layout)),
+        dbc.Row(dbc.Col(inputOutput_layout)),
+        dbc.Row(dbc.Col(updownload_layout)),
+    ])
+])
+#######################################
+# figure section
+#######################################
+# simplify dataset
+df_figure = df_weather[
+    ['Date', 'Location', 'MinTemp', 'MaxTemp', 'Rainfall', 'WindGustDir', 'WindGustSpeed', 'RainToday',
+     'RainTomorrow']].copy()
+df_figure.dropna(how='any', inplace=True)
+showFeature = ['MinTemp', 'MaxTemp', 'Rainfall', 'WindGustSpeed']
+showCityName = ['Albury', 'BadgerysCreek', 'Cobar']
+df_figure_city_time = df_figure[
+    (df_figure['Date'] > '2017-01-01') & (df_figure['Location'].isin(showCityName))]
+df_figure_city = df_figure[df_figure['Location'].isin(showCityName)]
+
+#######################################
+# Line-plot
+figLineplot = px.line(data_frame=df_figure_city_time, x='Date', y='MinTemp', color='Location',
+                      title='Line plot of minimum temperature in degrees Celsius hue city')
+
+lineplot_layout = html.Div([
+    html.P('Line-plot', className='h2'),
+    dcc.Graph(figure=figLineplot)
+], className='figure-section')
+#######################################
+# Bar-plot: stack, group
+figBarplotStack = px.bar(data_frame=df_figure_city, x='Location', y='Rainfall', color='RainTomorrow',
+                         title='Bar plot of today rainfall in different cities hue by rain tomorrow')
+figBarplotGroup = px.bar(data_frame=df_figure_city, x='Location', y='RainToday', color='RainTomorrow', barmode='group',
+                         title='Bar plot in different cities group by RainTomorrow')
+
+barplot_layout = html.Div([
+    html.P('Bar-plot', className='h2'),
+    dcc.Graph(figure=figBarplotStack),
+    dcc.Graph(figure=figBarplotGroup),
+], className='figure-section')
+#######################################
+# count-plot (There is only histogram in plotly)
+figCount = px.histogram(data_frame=df_figure_city, x='RainToday', color='RainToday',
+                        title='Count plot of Rain Today')
+
+countplot_layout = html.Div([
+    html.P('Count-plot(histogram)', className='h2'),
+    dcc.Graph(figure=figCount)
+], className='figure-section')
+#######################################
+# Cat-plot(scatter plot)
+figCatplot = px.scatter(data_frame=df_figure_city_time, y='MaxTemp', x='Location', size='Rainfall',
+                        color='Location',
+                        title='Cat-plot of MaxTemp size by rainfall hue city')
+
+catplot_layout = html.Div([
+    html.P('Cat-plot(scatter plot)', className='h2'),
+    dcc.Graph(figure=figCatplot)
+], className='figure-section')
+#######################################
+# Pie-chart
+labels = df_figure_city_time['WindGustDir'].value_counts().keys().tolist()
+values = df_figure_city_time['WindGustDir'].value_counts().tolist()
+figPirchart = go.Figure(go.Pie(values=values, labels=labels,
+                               title='Pie chart of the wind gust direction'))
+
+piechart_layout = html.Div([
+    html.P('Pie-chart', className='h2'),
+    dcc.Graph(figure=figPirchart)
+], className='figure-section')
+#######################################
+# Displot
+figDisplot = px.histogram(data_frame=df_figure_city_time, x='MaxTemp', color='Location',
+                          title='Displot of MaxTemp hue by city')
+
+displot_layout = html.Div([
+    html.P('Displot', className='h2'),
+    dcc.Graph(figure=figDisplot)
+], className='figure-section')
+#######################################
+# Pair plot(scatter_matrix)
+figPairplot = px.scatter_matrix(data_frame=df_figure_city_time, dimensions=showFeature,
+                                color='Location',
+                                title='Pair plot about MinTemp, MaxTemp, Rainfall, WindGustSpeed hue by city')
+
+pairplot_layout = html.Div([
+    html.P('Pair plot(scatter_matrix)', className='h2'),
+    dcc.Graph(figure=figPairplot)
+], className='figure-section')
+#######################################
+# Heatmap
+df_showCity_heatmap = df_figure_city.copy()
+df_showCity_heatmap = df_showCity_heatmap[['Date', 'MaxTemp']]
+df_showCity_heatmap_new = df_showCity_heatmap.groupby(pd.PeriodIndex(df_showCity_heatmap['Date'], freq="M"))[
+    'MaxTemp'].mean()
+df_showCity_heatmap_new = pd.DataFrame(df_showCity_heatmap_new)
+df_showCity_heatmap_new['Date'] = df_showCity_heatmap_new.index
+df_showCity_heatmap_new['year'] = df_showCity_heatmap_new['Date'].dt.year
+df_showCity_heatmap_new['month'] = df_showCity_heatmap_new['Date'].dt.month
+df_showCity_heatmap_new = df_showCity_heatmap_new.pivot('year', 'month', 'MaxTemp')
+
+figHeatmap = px.imshow(df_showCity_heatmap_new, text_auto=True, aspect="auto",
+                       title='Heatmap of MaxTemp average in month and year')
+
+heatmap_layout = html.Div([
+    html.P('Heatmap', className='h2'),
+    dcc.Graph(figure=figHeatmap)
+], className='figure-section')
+#######################################
+# Hist-plot
+hist_data = [df_figure_city_time['MinTemp'].tolist(), df_figure_city_time['MaxTemp'].tolist()]
+group_labels = ['MinTemp', 'MaxTemp']
+figHistplot = ff.create_distplot(hist_data, group_labels)
+figHistplot.update_layout(title_text='Hist-plot of MaxTemp and MinTemp')
+
+histplot_layout = html.Div([
+    html.P('Hist-plot', className='h2'),
+    dcc.Graph(figure=figHistplot)
+], className='figure-section')
+#######################################
+# QQ-plot
+from statsmodels.graphics.gofplots import qqplot
+
+qqplot_data = qqplot(data=df_figure_city_time['MinTemp'], line='s').gca().lines
+
+figQQplot = go.Figure()
+
+figQQplot.add_trace({
+    'type': 'scatter',
+    'x': qqplot_data[0].get_xdata(),
+    'y': qqplot_data[0].get_ydata(),
+    'mode': 'markers',
+    'marker': {
+        'color': '#19d3f3'
+    }
+})
+
+figQQplot.add_trace({
+    'type': 'scatter',
+    'x': qqplot_data[1].get_xdata(),
+    'y': qqplot_data[1].get_ydata(),
+    'mode': 'lines',
+    'line': {
+        'color': '#636efa'
+    }
+
+})
+
+figQQplot['layout'].update({
+    'title': 'Quantile-Quantile Plot of MinTemp',
+    'xaxis': {
+        'title': 'Theoritical Quantities',
+        'zeroline': False
+    },
+    'yaxis': {
+        'title': 'Sample Quantities'
+    },
+    'showlegend': False,
+    'width': 800,
+    'height': 700,
+})
+
+qqplot_layout = html.Div([
+    html.P('QQ-plot', className='h2'),
+    dcc.Graph(figure=figQQplot)
+], className='figure-section')
+#######################################
+# Kernal density estimate
+figKde = px.density_contour(df_figure_city_time, x="MinTemp", y="WindGustSpeed", color="Location",
+                            title='Kde plot of WindGustSpeed versus MinTemp hue by city')
+
+kde_layout = html.Div([
+    html.P('Kernal density estimate', className='h2'),
+    dcc.Graph(figure=figKde)
+], className='figure-section')
+#######################################
+# Scatter plot and regression line
+figScatterplot = px.scatter(data_frame=df_figure_city_time, y='WindGustSpeed', x='MinTemp',
+                                          trendline="ols",
+                                          title='Scatter plot of WindGustSpeed versus MinTemp and regression line')
+scatterplot_layout = html.Div([
+    html.P('Scatter plot and regression line', className='h2'),
+    dcc.Graph(figure=figScatterplot)
+], className='figure-section')
+#######################################
+# Multivariate Box plot
+figBoxplot = px.box(data_frame=df_figure_city_time, x='Location', y='MinTemp', color='Location',
+                    title="Box plot of MinTemp in different cities")
+
+boxplot_layout = html.Div([
+    html.P('Multivariate Box plot', className='h2'),
+    dcc.Graph(figure=figBoxplot)
+],className='figure-section')
+#######################################
+# Area plot
+figAreaplot = px.area(df_figure_city_time, x="Date", y="MinTemp", color="Location", line_group="Location",
+                      title='Area plot of MinTemp hue by city')
+
+areplot_layout = html.Div([
+    html.P('Area plot', className='h2'),
+    dcc.Graph(figure=figAreaplot)
+], className='figure-section')
+#######################################
+# Violin plot
+figViolin = px.violin(df_figure_city_time, y="MaxTemp", x="Location", color="Location",
+            box=True, points="all", title='Violin plot of MaxTemp hue by city')
+
+violinplot_layout = html.Div([
+    html.P('Violin plot', className='h2'),
+    dcc.Graph(figure=figViolin)
+], className='figure-section')
+
+
+#######################################
+# figure_section main page
+figure_section = html.Div([
+    html.Div(className='container', children=[
+        dbc.Row(dbc.Col(html.P("Hello, Welcome to Figure section!", className='head-title', ))),
+        lineplot_layout,
+        barplot_layout,
+        countplot_layout,
+        catplot_layout,
+        piechart_layout,
+        displot_layout,
+        pairplot_layout,
+        heatmap_layout,
+        histplot_layout,
+        qqplot_layout,
+        kde_layout,
+        scatterplot_layout,
+        boxplot_layout,
+        areplot_layout,
+        violinplot_layout
     ])
 ])
 
@@ -382,8 +796,8 @@ nav = dbc.Nav(
     [
         dcc.Location(id='url', refresh=False),
         dbc.NavItem(dbc.NavLink("City", id='city-page', active=True, href="/city-page")),
-        dbc.NavItem(dbc.NavLink("Core Compeonents", id='core-component', active=True, href="/core-component")),
-        dbc.NavItem(dbc.NavLink("Rain", href="#")),
+        dbc.NavItem(dbc.NavLink("Core Components", id='core-component', active=True, href="/core-component")),
+        dbc.NavItem(dbc.NavLink("Figure Section", id='figure-section', active=True, href="/figure-section")),
         dbc.NavItem(dbc.NavLink("Disabled", disabled=True, href="#")),
         dbc.DropdownMenu(
             [dbc.DropdownMenuItem("Item 1"), dbc.DropdownMenuItem("Item 2")],
@@ -403,6 +817,8 @@ def navLink(pathname):
         return city_page
     elif pathname == '/core-component':
         return core_component
+    elif pathname == '/figure-section':
+        return figure_section
     else:
         return index_page_main
 
