@@ -10,13 +10,13 @@ import plotly.graph_objects as go
 # pandas
 df = pd.read_csv('weatherAUS.csv')
 df_weather = df.copy()
-
+df_figure = df_weather.copy()
 # simplify dataset
-df_figure = df_weather[
-    ['Date', 'Location', 'MinTemp', 'MaxTemp', 'Rainfall', 'WindGustDir',
-     'WindGustSpeed', 'RainToday', 'RainTomorrow']].copy()
-df_figure.dropna(how='any', inplace=True)
-showFeature = ['MinTemp', 'MaxTemp', 'Rainfall', 'WindGustSpeed', 'RainTomorrow']
+# df_figure = df_weather[
+#     ['Date', 'Location', 'MinTemp', 'MaxTemp', 'Rainfall', 'WindGustDir',
+#      'WindGustSpeed', 'RainToday', 'RainTomorrow']].copy()
+# df_figure.dropna(how='any', inplace=True)
+# showFeature = ['MinTemp', 'MaxTemp', 'Rainfall', 'WindGustSpeed', 'RainTomorrow']
 showCityName = ['Albury', 'BadgerysCreek', 'Cobar']
 df_figure_city_time = df_figure[
     (df_figure['Date'] > '2017-01-01') & (df_figure['Location'].isin(showCityName))]
@@ -24,10 +24,12 @@ df_figure_city = df_figure[df_figure['Location'].isin(showCityName)]
 
 # app = dash.Dash('figureCheck', external_stylesheets=external_stylesheets)
 
-labels = df_figure_city_time['WindGustDir'].value_counts().keys().tolist()
-values = df_figure_city_time['WindGustDir'].value_counts().tolist()
-fig = px.pie(labels=['SE', 'SW', 'ENE', 'E', 'WSW', 'W', 'S', 'SSW', 'ESE', 'SSE', 'NE', 'NNE', 'WNW', 'N', 'NW', 'NNW'], values=values, title='Pie chart of the wind gust direction')
-fig.show()
+figCatplot = px.scatter(data_frame=df_figure_city_time, y='MaxTemp', x='Location', size='Rainfall',
+                                color='Location',
+                                title='Cat-plot of MaxTemp size by rainfall hue city')
+figCatplot.update_layout(yaxis_title='MaxTemp (℃)')
+figCatplot.show()
+
 
 # app.layout([
 #     figTabsA
