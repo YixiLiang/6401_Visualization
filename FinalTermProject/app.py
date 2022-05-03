@@ -7,7 +7,6 @@ from dash import dash_table
 import plotly.express as px
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from dash_bootstrap_components._components.Container import Container
 import plotly.graph_objects as go
 import datetime
 import io
@@ -15,13 +14,11 @@ import base64
 import plotly.figure_factory as ff
 
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
 # try running the app with one of the Bootswatch themes e.g.
 # app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
 # app = dash.Dash(external_stylesheets=[dbc.themes.SKETCHY])
 server = app.server
-
 #######################################
 # load data
 #######################################

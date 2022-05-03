@@ -2,23 +2,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import dash as dash
-from dash import dcc
-from dash import html
-import plotly.express as px
-from dash.dependencies import Input, Output, State
-import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from numpy import linalg as LA
-
 from statsmodels.graphics.gofplots import qqplot
 import scipy.stats as st
-
 import matplotlib.patches as mpatches
-
 #######################################
 # load data
 #######################################
@@ -160,9 +149,9 @@ corcoe_reduced = pd.DataFrame(X_PCA).corr()
 sns.heatmap(corcoe_reduced, annot=True)
 plt.title('Correlation Coefficient between features-Reduced feature space')
 plt.show()
-# #######################################
-# # Normality test
-# #######################################
+#######################################
+# Normality test
+#######################################
 # histogram of numeric columns
 plt.figure(figsize=(16,9))
 for i in range(len(numericalColName)):
@@ -226,9 +215,9 @@ for i in range(len(numericalColName)):
     print(f'K-S test after transformed of {numericalColName[i]}: statistics = {kstestX[0]} p-value = {kstestX[1]}')
     # print(f'K-S test after transformed of {numericalColName[i]}: {numericalColName[i]} dataset looks ')
     print(f'Shapiro test after transformed: statistics = {shapiroX[0]} p-value = {shapiroX[1]}')
-# #######################################
-# # Heatmap & Pearson correlation coefficient matrix
-# #######################################
+#######################################
+# Heatmap & Pearson correlation coefficient matrix
+#######################################
 #Correlation coefficient matrix
 plt.figure(figsize=(14,10))
 corcoe = df_weather.corr()
@@ -265,7 +254,6 @@ plt.title('Line plot of minimum temperature in degrees Celsius hue city')
 plt.show()
 #######################################
 # Bar-plot : stack, group
-# tips = sns.load_dataset("tips")
 # stack
 plt.figure()
 bar1 = sns.barplot(data=df_showCity,y='Rainfall', x='Location',estimator=sum, color='darkblue')
@@ -396,7 +384,6 @@ plt.show()
 df_showCity_subplot = df_showCity[(df_showCity['Date'] > '2017-05-15') & (df_showCity['Date'] < '2017-06-01')]
 df_showCity_subplot = df_showCity_subplot[df_showCity_subplot['Location'] == 'Albury']
 
-
 plt.figure(figsize=(16,9))
 plt.subplot(3,2,1)
 sns.lineplot(data=df_showCity_subplot, x='Date', y='Rainfall')
@@ -448,6 +435,3 @@ plt.title('Line plot of Pressure')
 
 plt.tight_layout()
 plt.show()
-
-#######################################
-#######################################

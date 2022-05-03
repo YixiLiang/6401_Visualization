@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 #######################################
 # load data
 #######################################
-df = pd.read_csv('weatherAUS.csv')
+df = pd.read_csv('../FinalTermProject/weatherAUS.csv')
 df_weather = df.copy()
 colName = df_weather.columns
 largeNaList = []

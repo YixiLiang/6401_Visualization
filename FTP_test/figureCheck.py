@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # pandas
-df = pd.read_csv('weatherAUS.csv')
+df = pd.read_csv('../FinalTermProject/weatherAUS.csv')
 df_weather = df.copy()
 df_figure = df_weather.copy()
 # simplify dataset
